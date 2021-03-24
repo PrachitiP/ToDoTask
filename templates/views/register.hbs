@@ -1,0 +1,24 @@
+{{>navbar}}
+<h1>Registration Page</h1>
+
+<form action="/register" method="POST">
+    <label for="firstname">User Name</label>
+    <input type="text" placeholder="firstname" id="firstname" name="firstname">
+
+    <label for="lastname">Last Name</label>
+    <input type="text" placeholder="lastname" id="lastname" name="lastname">
+
+    <label for="email" method="POST">Email</label>
+    <input type="email" id="email" name="email">
+
+    <label for="phone" method="POST">Mobile No.:</label>
+    <input type="text" id="phone" name="phone">
+    
+    <label for="password" methos="POST">Password</label>
+    <input type="password" id="password" name="passowrd">
+
+    <label for="confirmpassword" methos="POST">Confirm Password</label>
+    <input type="confirmpassword" id="confirmpassword" name="confirmpassoword">
+
+    <input type="submit" class="btnRegister" value="Register">
+    </form>
