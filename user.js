@@ -1,13 +1,19 @@
 const mongoose = require("mongoose");
-
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken"); 
 const userSchema = new mongoose.Schema({
+     userId:{
+        type:String
+     },
      firstname:{
          type:String,
-         required:true
+         required:true,
+         
      },
      lastname:{
         type:String,
-        required:true
+        required:true,
+      
      },
      email:{
         type:String,
@@ -15,21 +21,54 @@ const userSchema = new mongoose.Schema({
         unique:true
      },
      phone:{
-        type:Number,
+        type:String,
         required:true,
         unique:true
      },
-     password:{
+     pass:{
         type:String,
-        required:true
+       
      },
-     confirmpassword:{
+     confirmPass:{
         type:String,
-        required:true
-     }
+       
+     },
+     tokens:[{
+        token:{
+           type:String,
+           required:true
+        }
+     }]
+
+     
+})
+
+userSchema.methods.generateAuthToken = async function(){
+   try{
+     // console.log(this._id)
+      const token = jwt.sign({_id:this._id.toString()}, "qwertyuiopasdfghjklzxcvbnmqwerty");
+      this.tokens = this.tokens.concat({token:token})
+      await this.save();
+     // console.log(token);
+      return token;
+   }catch(error){
+      res.send("error"+error);
+      console.log("error"+ error);
+   }
+}
+
+userSchema.pre("save", async function(next){
+   if(this.isModified("pass")){
+     // console.log(`current password is ${this.pass}`);
+      this.pass =await bcrypt.hash(this.pass, 10);
+    //  console.log(`ths current password id ${this.password}`);
+
+      this.confirmPass = await bcrypt.hash(this.pass, 10);
+   }
+   next();
 })
 
 //collection
-const Register = new mongoose.model("Register", userSchema);
+const Register = mongoose.model("Register", userSchema);
 
 module.exports= Register;

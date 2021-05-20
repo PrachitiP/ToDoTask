@@ -1,0 +1,61 @@
+{{>navbar}}
+<h1>Add Task</h1>
+
+
+    <lable>Task :</lable>
+    <input type="text" id="field1" name="task">
+    <br>
+    <button type="submit"  id="submit" onclick="process()">Submit</button>
+    <br>
+    <ul id="field2"></ul>
+
+
+<script>
+    function process(){
+        var Task = document.getElementById("field1").value;
+        var Addtask= document.getElementById("field2");
+        
+        var node = document.createElement("LI");
+        node.innerText= Task;
+        Addtask.appendChild(node);
+
+
+        var deleteButton = document.createElement("button");
+        deleteButton.innerHTML = "Delete";
+        deleteButton.setAttribute("class", "btn delete");
+
+        var editButton = document.createElement("button");
+        editButton.innerHTML = "Edit";
+        editButton.setAttribute("class", "btn edit");
+        editButton.setAttribute("onclick", "editThis(this)");
+
+        var buttons = document.createElement("div");
+        buttons.setAttribute("class", "buttons");
+        buttons.appendChild(deleteButton);
+        buttons.appendChild(editButton);
+        node.appendChild(buttons)
+
+        var xhr = new XMLHttpRequest();
+       
+        const jsonString = {task:Task}
+        xhr.open("POST", "http://localhost:3000/insert", true);
+        xhr.setRequestHeader("Content-type", "application/json");
+        xhr.send(JSON.stringify(jsonString));
+        
+        console.log(JSON.stringify(Addtask))
+    
+
+
+}
+    
+
+
+  
+</script>  
+    
+        
+     
+    
+
+
+        

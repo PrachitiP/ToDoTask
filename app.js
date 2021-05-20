@@ -7,6 +7,12 @@ const { rawListeners } = require("process");
 const bodyParser = require("body-parser")
 const port = process.env.PORT || 3000
 const Register =  require("./user");
+const Task = require("./taskSchema");
+const crypto =require("crypto");
+const bcryptjs = require("bcryptjs");
+const bcrypt = require("bcrypt");
+
+
 
 const static_path = path.join(__dirname, "views");
 const template_path = path.join(__dirname, "./templates/views")
@@ -20,9 +26,11 @@ app.set("view engine", "hbs");
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 
-app.get('/', (req,res) =>{
-    res.render("index")
-});
+
+
+app.get("/", (req,res) =>{
+    res.render("index");
+})
 
 app.get("/register", (req,res)=>{
     res.render("register");
@@ -31,57 +39,85 @@ app.get("/register", (req,res)=>{
 app.get("/login", (req,res) =>{
     res.render("login");
 })
-app.post("/register", async(req,res)=>{
+
+app.get("/insert", (req,res) =>{
+    res.render("insert");
+})
+
+
+
+app.post("/register",  async(req,res)=>{
     try{
-        const password = req.body.password;
-        const confirmpassword = req.body.confirmpassword;
-        console.log(req.body);
-        if(password === confirmpassword){
-           /* const registerUser = new Register({
+        const pass = req.body.pass;
+        const confirmPass = req.body.confirmPass;
+       
+        if(pass === confirmPass){
+            
+           const userRegister = new Register({
+                userId : crypto.randomBytes(64).toString('hex'),
                 firstname: req.body.firstname,
                 lastname:req.body.lastname,
                 email:req.body.email,
                 phone:req.body.phone,
-                password:password,
-                confirmpassword:confirmpassword
-            })*/
-            //const registered =  await registerUser.save();
-            Register.create({firstname: req.body.firstname,
-                lastname:req.body.lastname,
-                email:req.body.email,
-                phone:req.body.phone,
-                password:password,
-                confirmpassword:confirmpassword}, function (err, small) {
-                if (err) return console.log(err);
-                // saved
-                console.log(small);
+                pass:req.body.pass,
+                confirmPass:req.body.confirmPass
               });
+            console.log(userRegister);
+
+            const token = await userRegister.generateAuthToken();
+            console.log("token"+ token);
+        
+            const registered = await userRegister.save();
             res.render("index");
+            return token;
             
         }else{
             res.send("Password does not match");
         }
     }catch(error){
         res.status(400).send(error);
+        console.log("error part");
     }
 })
 
-app.post("/login", async (req,res) => {
+
+app.post("/login", async(req,res) => {
     try{
         const email = req.body.email;
-        const password = req.body.password; 
-       
+        const pass = req.body.pass; 
+        
         const userEmail = await Register.findOne({email:email});
-        if(userEmail.password === password)
+        const isMatch = await bcrypt.compare(pass, userEmail.pass);
+        
+        
+        if(isMatch)
         {
                 res.render("index");
+                
         }else{
             res.send("invalid login deatils");
         }
     }catch(error){
         res.status(400).send("invalid login deatils");
     }
+    
 })
+
+
+app.post("/insert", async(req, res) => {
+    const task = req.body.task;
+    const addTask= new Task({ task });
+
+    addTask
+      .save()
+      .then(() => {
+        console.log("Successfully added task!");
+        console.log(addTask);
+        res.send(addTask);
+      })
+      .catch((err) => console.log(err));
+  })
+
 
 app.listen(port, () =>{
     console.log(`Server is running on port ${port}`);
